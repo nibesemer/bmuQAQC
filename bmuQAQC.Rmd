@@ -1,12 +1,26 @@
+---
+output:
+  html_document:
+    fig_height: 5
+    fig_width: 5
+    fig_position: center
+  always_allow_html: true
+  word_document: default
+---
 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                message = FALSE, warning = FALSE, 
+                fig.align = "center")
+options(htmltools.dir.version = FALSE)
+
+```
 
 ---
 title: "bmuQAQC"
 author: "Nicole Besemer"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: html_document:
-  always_allow_html: true
-
 
 ---
 
@@ -19,6 +33,7 @@ library(scales)
 library(ggplot2)
 library(kableExtra)
 library(ggpubr)
+library(webshot)
 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE, error = FALSE, echo = FALSE, cache = TRUE, autodep = TRUE, cache.comments = FALSE, tidy.opts=list(width.cutoff=60),tidy=TRUE, cache.lazy = FALSE, results = "asis")
 ```
