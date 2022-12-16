@@ -1,0 +1,14 @@
+load data	data
+set_dates	data
+set bounds	bounds	vars
+summary	summary.samples
+bounds	.bmuQAQC_cache/html/bounds_e3591282322bf89a741f9be186450f22_meta
+unnamed-chunk-1	.bmuQAQC_cache/html/unnamed-chunk-1_95eed1d24741123fe42cf76e51f1d3d7_meta
+plot macroboring	plot1
+plotgrazing	plot2
+grazingVSaccretion	plot4
+volumeVSmass	plot5
+netAccretion vs net erosion	plot6
+bioerosion rate	plot7
+accretionRate	plot8
+accretion	plot3

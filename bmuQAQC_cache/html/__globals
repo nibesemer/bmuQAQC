@@ -1,0 +1,14 @@
+load data	head	read_csv
+set_dates	$	$<-	mdy
+set bounds	$	$<-	as.data.frame	c	colnames<-	data	length	matrix	max	min	rownames<-	t
+summary	%>%	==	data	Duration	Fate	group_by	length	mean	RegionCode	summarize	tagNum
+bounds	%>%	bounds	c	kable	kable_styling
+unnamed-chunk-1	%>%	c	kable	kable_styling	summary.samples
+plot macroboring	aes	bquote	data	geom_point	ggplot	PostCTMacroboring	scale_y_continuous	tagNum
+plotgrazing	aes	bquote	data	geom_point	ggplot	PostCTGrazing	scale_y_continuous	tagNum
+grazingVSaccretion	aes	bquote	data	geom_point	ggplot	PostCTAccretion	PostCTGrazing	scale_x_continuous	scale_y_continuous
+volumeVSmass	aes	bquote	data	geom_point	ggplot	PostVolume	PostWeightClean	PreVolume	PreWeightEpoxied	scale_x_continuous	scale_y_continuous
+netAccretion vs net erosion	aes	bquote	data	geom_point	ggplot	PostCTAccretion	PostCTGrazing	PostCTMacroboring	scale_x_continuous	scale_y_continuous
+bioerosion rate	aes	bquote	data	element_blank	geom_boxplot	geom_point	ggplot	labs	PostCTGrazingRate	PostCTMacroboringRate	RegionCode	theme
+accretionRate	aes	bquote	data	element_blank	geom_boxplot	geom_point	ggplot	labs	PostCTAccretionRate	RegionCode	theme
+accretion	aes	bquote	data	geom_point	ggplot	PostCTAccretion	scale_y_continuous	tagNum

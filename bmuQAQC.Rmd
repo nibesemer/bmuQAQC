@@ -18,13 +18,13 @@ options(htmltools.dir.version = FALSE)
 ```
 
 ---
-title: "bmuQAQC"
+title: " Bioerosion Monitoring Unit QAQC"
 author: "Nicole Besemer"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 
 ---
 
-```{r setup, include=FALSE}
+```{r setup2, include=FALSE}
 library(knitr)
 library(lubridate)
 library(dplyr)
@@ -34,13 +34,14 @@ library(ggplot2)
 library(kableExtra)
 library(ggpubr)
 library(webshot)
+library(readr)
 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE, error = FALSE, echo = FALSE, cache = TRUE, autodep = TRUE, cache.comments = FALSE, tidy.opts=list(width.cutoff=60),tidy=TRUE, cache.lazy = FALSE, results = "asis")
 ```
 
 
 
-```{r load data}
+```{r load data, echo=FALSE, include=FALSE}
 ##loaddata
 
 
@@ -125,13 +126,12 @@ bounds = t(bounds)
 summary.samples = data %>%
   group_by(RegionCode) %>%
   summarize(
-    NO.SAMPLES = length(tagNum))
-    #NO.RECOVERED = length(Fate = "SUCCESSFULY RECOVERED"),
-    #NO.LOST = Lenth(Fate = "NOT RECOVERED"))
+    totalSamples = length(tagNum),
+    deplomentDuration = mean(Duration),
+    numberRecovered = length(Fate == 'SUCCESSFULY RECOVERED'))
 ```
 
 
-The file used in this QC routine is: `r basename(data)`
 
 QC run at: `r now(tzone = "EST")` EST
 
@@ -139,18 +139,21 @@ Number of samples in data file: `r nrow(data)`
 
 
 
-Number of BMUS in 
-
 
 ## Data extents and ranges
 
+Macroboring, macroboring rate, grazing and grazing rate represent negative values
+
 ```{r bounds}
-kable(bounds, format = "html", booktabs = TRUE, longtable = TRUE) %>% kable_styling(latex_options = c("striped", "hold_position", "repeat_header"))
+kable(bounds, format = "html", booktabs = TRUE, longtable = TRUE) %>% kable_styling(latex_options = c("striped", "hold_position", "repeat_header"), full_width = FALSE)
 ```
 
 
+## Number of samples in report
+
+
 ```{r}
-kable(summary.samples, format = "html", booktabs = TRUE, longtable = TRUE) %>% kable_styling(latex_options = c("striped", "hold_position", "repeat_header","scale_down") , font_size = 8)
+kable(summary.samples, format = "html", booktabs = TRUE, longtable = TRUE) %>% kable_styling(latex_options = c("striped", "hold_position", "repeat_header"), full_width = FALSE)
 ```
 
 
@@ -158,57 +161,86 @@ kable(summary.samples, format = "html", booktabs = TRUE, longtable = TRUE) %>% k
 ## QAQC Plots
 
 
+###  Macroboring by bmu
 
-```{r plot macroboring, echo=FALSE}
+Check for non-negatives and any extreme outliers
+
+
+
+
+```{r plot macroboring, echo=FALSE, fig.width = 6, fig.height = 4}
 plot1<-ggplot(data = data) +
   geom_point(aes(x = tagNum, 
                 y = PostCTMacroboring*-1),
-             size=3, colour = "red")
+             size=3, colour = "red")+
+  scale_y_continuous(name = bquote('PostCTMacroboring'~(cm^3)))
 plot1
 ```
 
-```{r plotgrazing, echo=FALSE}
+
+
+### Grazing by BMU
+
+
+
+
+```{r plotgrazing, echo=FALSE, fig.width = 6, fig.height = 4}
 plot2<-ggplot(data = data) +
   geom_point(aes(x = tagNum, 
                 y = PostCTGrazing*-1),
-             size=3, colour = "darkgreen")
+             size=3, colour = "blue")+
+  scale_y_continuous(name = bquote('PostCTGrazing'~(cm^3)))
 plot2
 
 
 ```
-```{r grazingVSaccretion, echo=FALSE}
+
+
+
+### Accretion by BMU
+```{r accretion, echo=FALSE, fig.width = 6, fig.height = 4}
 plot3<-ggplot(data = data) +
-  geom_point(aes(x = PostCTAccretion, 
-                y = (PostCTGrazing*-1)),
-             size=3, colour = "black")
+  geom_point(aes(x = tagNum, 
+                y = PostCTAccretion),
+             size=3, colour = "darkgreen")+
+  scale_y_continuous(name = bquote('PostCTAccretion'~(cm^3)))
 plot3
 ```
 
-```{r volumeVSmass, echo=FALSE}
 
+
+
+
+
+
+
+### Grazing vs Accretion
+
+
+
+```{r grazingVSaccretion, echo=FALSE, fig.width = 6, fig.height = 4}
 plot4<-ggplot(data = data) +
-  geom_point(aes(x = (PostVolume-PreVolume), 
-                y = (PostWeightClean-PreWeightEpoxied)),
-             size=3, colour = "blue")+
-  scale_x_continuous(name="volDifference")+
-  scale_y_continuous(name = "weightDifference")
-
+  geom_point(aes(x = PostCTAccretion, 
+                y = (PostCTGrazing*-1)),
+             size=3, colour = "black")+
+  scale_x_continuous(name=bquote('PostCTAccretion'~(cm^3)))+
+  scale_y_continuous(name = bquote('PostCTGrazing'~(cm^3)))
 plot4
-
-
 ```
 
+### Change in Volume vs Change in Weight
+
+Should have a linear relationship
 
 
-
-```{r netAccretion vs net erosion, echo=FALSE}
+```{r volumeVSmass, echo=FALSE, fig.width = 6, fig.height = 4}
 
 plot5<-ggplot(data = data) +
-  geom_point(aes(x = (PostCTMacroboring+PostCTGrazing), 
-                y = (PostCTAccretion)),
-             size=3, colour = "blue")+
-  scale_x_continuous(name="netErosion")+
-  scale_y_continuous(name = "netAccretion")
+  geom_point(aes(x = (PostVolume-PreVolume), 
+                y = (PostWeightClean-PreWeightEpoxied)),
+             size=3, colour = "black")+
+  scale_x_continuous(name=bquote('volDifference'~(cm^3)))+
+  scale_y_continuous(name = "weightDifference (g)")
 
 plot5
 
@@ -216,30 +248,52 @@ plot5
 ```
 
 
+### Net Accretion vs Net Erosion
 
 
-```{r bioerosion rate, echo=FALSE}
 
-plot6<- ggplot(data=data) + 
-  geom_boxplot(aes(x=RegionCode, y=((PostCTGrazingRate+PostCTMacroboringRate)*-1)))+
-  labs(x="Dry Tortugas", y = "Erosion Rate")+ geom_point(aes(x=RegionCode, y=((PostCTGrazingRate+PostCTMacroboringRate)*-1)), shape=16, size=3)+
-  theme(axis.text.x = element_blank())
+```{r netAccretion vs net erosion, echo=FALSE, fig.width = 6, fig.height = 4}
+
+plot6<-ggplot(data = data) +
+  geom_point(aes(x = (PostCTMacroboring+PostCTGrazing), 
+                y = (PostCTAccretion)),
+             size=3, colour = "black")+
+  scale_x_continuous(name = bquote('netErosion'~(cm^3)))+
+  scale_y_continuous(name = bquote('netAccretion'~(cm^3)))
 
 plot6
+
 
 ```
 
 
+### Bioerosion Rate
+
+combination of macroboring and grazing
 
 
-```{r accretionRate, echo=FALSE}
+```{r bioerosion rate, echo=FALSE, fig.width = 5, fig.height = 5}
 
 plot7<- ggplot(data=data) + 
-  geom_boxplot(aes(x=RegionCode, y=(PostCTAccretionRate)))+
-  labs(x="Dry Tortugas", y = "Accretion Rate")+ geom_point(aes(x=RegionCode, y=(PostCTAccretionRate)), shape=16, size=3)+
+  geom_boxplot(aes(x=RegionCode, y=((PostCTGrazingRate+PostCTMacroboringRate)*-1)))+
+  labs(x="Dry Tortugas", y = bquote('Erosion Rate'~(cm^3/year)))+ geom_point(aes(x=RegionCode, y=((PostCTGrazingRate+PostCTMacroboringRate)*-1)), shape=16, size=3)+
   theme(axis.text.x = element_blank())
 
 plot7
+
+```
+
+### Accretion Rate
+
+
+```{r accretionRate, echo=FALSE, , fig.width = 5, fig.height = 5}
+
+plot8<- ggplot(data=data) + 
+  geom_boxplot(aes(x=RegionCode, y=(PostCTAccretionRate)))+
+  labs(x="Dry Tortugas", y = bquote('Accretion Rate'~(cm^3/year)))+ geom_point(aes(x=RegionCode, y=(PostCTAccretionRate)), shape=16, size=3)+
+  theme(axis.text.x = element_blank())
+
+plot8
 
 
 ```
