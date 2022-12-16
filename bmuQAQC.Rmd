@@ -1,0 +1,236 @@
+
+
+---
+title: "bmuQAQC"
+author: "Nicole Besemer"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document:
+    fig_height: 5
+    fig_width: 5
+    fig_position: center
+  always_allow_html: true
+  word_document: default
+
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(lubridate)
+library(dplyr)
+library(tools)
+library(scales)
+library(ggplot2)
+library(kableExtra)
+library(ggpubr)
+
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, error = FALSE, echo = FALSE, cache = TRUE, autodep = TRUE, cache.comments = FALSE, tidy.opts=list(width.cutoff=60),tidy=TRUE, cache.lazy = FALSE, results = "asis")
+```
+
+
+
+```{r load data}
+##loaddata
+
+
+data<-read_csv("~/documents/R/bmuQAQC/NCRMP_BMU_DRTO_2021.csv")
+head(data)
+
+
+```
+
+
+```{r set_dates, echo=FALSE}
+
+data$Deployment = mdy(data$Deployment)
+data$Recovery = mdy(data$Recovery)
+
+
+```
+
+```{r}
+
+# Initiate the data frame and name the rows and columns
+vars =  c(
+
+  "Latitude",
+  "Longitude",
+  
+  "PreWeightBlock",
+  "PreWeightEpoxied",
+  "PreVolume",
+  "PreRWDensity",
+  "PreCTDensity",
+  
+  "PostWeightDirty",
+  "PostWeightClean",
+  "PostVolume",
+  "PostCTDensity",
+  
+  "PostCTMacroboring",
+  "PostCTMacroboringRate",
+  "PostCTGrazing",
+  "PostCTGrazingRate",
+  "PostCTAccretion",
+  "PostCTAccretionRate"
+)
+
+bounds = as.data.frame(matrix(nrow = 2, ncol = length(vars)))
+colnames(bounds) = vars
+rownames(bounds) = c("Min", "Max")
+
+
+bounds$Latitude = c(min(data$Latitude), max(data$Latitude))
+bounds$Longitude = c(min(data$Longitude), max(data$Longitude))
+
+
+bounds$PreWeightBlock = c(min(data$PreWeightBlock), max(data$PreWeightBlock))
+bounds$PreWeightEpoxied = c(min(data$PreWeightEpoxied), max(data$PreWeightEpoxied))
+bounds$PreVolume = c(min(data$PreVolume), max(data$PreVolume))
+bounds$PreRWDensity = c(min(data$PreRWDensity), max(data$PreRWDensity))
+bounds$PreCTDensity = c(min(data$PreCTDensity), max(data$PreCTDensity))
+
+
+bounds$PostWeightDirty = c(min(data$PostWeightDirty), max(data$PostWeightDirty))
+bounds$PostWeightClean = c(min(data$PostWeightClean), max(data$PostWeightClean))
+bounds$PostVolume = c(min(data$PostVolume), max(data$PostVolume))
+bounds$PostCTDensity = c(min(data$PostCTDensity), max(data$PostCTDensity))
+
+
+bounds$PostCTMacroboring = c(min(data$PostCTMacroboring), max(data$PostCTMacroboring))
+bounds$PostCTMacroboringRate = c(min(data$PostCTMacroboringRate), max(data$PostCTMacroboringRate))
+bounds$PostCTGrazing = c(min(data$PostCTGrazing), max(data$PostCTGrazing))
+bounds$PostCTGrazingRate = c(min(data$PostCTGrazingRate), max(data$PostCTGrazingRate))
+bounds$PostCTAccretion = c(min(data$PostCTAccretion), max(data$PostCTAccretion))
+bounds$PostCTAccretionRate = c(min(data$PostCTAccretionRate), max(data$PostCTAccretionRate))
+
+bounds = t(bounds)
+
+```
+
+
+```{r}
+# Number of samples per island
+summary.samples = data %>%
+  group_by(RegionCode) %>%
+  summarize(
+    NO.SAMPLES = length(tagNum))
+    #NO.RECOVERED = length(Fate = "SUCCESSFULY RECOVERED"),
+    #NO.LOST = Lenth(Fate = "NOT RECOVERED"))
+```
+
+
+The file used in this QC routine is: `r basename(data)`
+
+QC run at: `r now(tzone = "EST")` EST
+
+Number of samples in data file: `r nrow(data)`
+
+
+
+Number of BMUS in 
+
+
+## Data extents and ranges
+
+```{r bounds}
+kable(bounds, format = "latex", booktabs = TRUE, longtable = TRUE) %>% kable_styling(latex_options = c("striped", "hold_position", "repeat_header"))
+```
+
+
+```{r}
+kable(summary.samples, format = "latex", booktabs = TRUE, longtable = TRUE) %>% kable_styling(latex_options = c("striped", "hold_position", "repeat_header","scale_down") , font_size = 8)
+```
+
+
+
+## QAQC Plots
+
+
+
+```{r plot macroboring, echo=FALSE}
+plot1<-ggplot(data = data) +
+  geom_point(aes(x = tagNum, 
+                y = PostCTMacroboring*-1),
+             size=3, colour = "red")
+plot1
+```
+
+```{r plotgrazing, echo=FALSE}
+plot2<-ggplot(data = data) +
+  geom_point(aes(x = tagNum, 
+                y = PostCTGrazing*-1),
+             size=3, colour = "darkgreen")
+plot2
+
+
+```
+```{r grazingVSaccretion, echo=FALSE}
+plot3<-ggplot(data = data) +
+  geom_point(aes(x = PostCTAccretion, 
+                y = (PostCTGrazing*-1)),
+             size=3, colour = "black")
+plot3
+```
+
+```{r volumeVSmass echo=FALSE }
+
+plot4<-ggplot(data = data) +
+  geom_point(aes(x = (PostVolume-PreVolume), 
+                y = (PostWeightClean-PreWeightEpoxied)),
+             size=3, colour = "blue")+
+  scale_x_continuous(name="volDifference")+
+  scale_y_continuous(name = "weightDifference")
+
+plot4
+
+
+```
+
+
+
+
+```{r netAccretion vs net erosion, echo=FALSE}
+
+plot5<-ggplot(data = data) +
+  geom_point(aes(x = (PostCTMacroboring+PostCTGrazing), 
+                y = (PostCTAccretion)),
+             size=3, colour = "blue")+
+  scale_x_continuous(name="netErosion")+
+  scale_y_continuous(name = "netAccretion")
+
+plot5
+
+
+```
+
+
+
+
+```{r bioerosion rate, echo=FALSE}
+
+plot6<- ggplot(data=data) + 
+  geom_boxplot(aes(x=RegionCode, y=((PostCTGrazingRate+PostCTMacroboringRate)*-1)))+
+  labs(x="Dry Tortugas", y = "Erosion Rate")+ geom_point(aes(x=RegionCode, y=((PostCTGrazingRate+PostCTMacroboringRate)*-1)), shape=16, size=3)+
+  theme(axis.text.x = element_blank())
+
+plot6
+
+```
+
+
+
+
+```{r accretionRate, echo=FALSE}
+
+plot7<- ggplot(data=data) + 
+  geom_boxplot(aes(x=RegionCode, y=(PostCTAccretionRate)))+
+  labs(x="Dry Tortugas", y = "Accretion Rate")+ geom_point(aes(x=RegionCode, y=(PostCTAccretionRate)), shape=16, size=3)+
+  theme(axis.text.x = element_blank())
+
+plot7
+
+
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
