@@ -5,11 +5,8 @@ title: "bmuQAQC"
 author: "Nicole Besemer"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document:
-    fig_height: 5
-    fig_width: 5
-    fig_position: center
   always_allow_html: true
-  word_document: default
+
 
 ---
 
@@ -47,7 +44,7 @@ data$Recovery = mdy(data$Recovery)
 
 ```
 
-```{r}
+```{r set bounds}
 
 # Initiate the data frame and name the rows and columns
 vars =  c(
@@ -108,7 +105,7 @@ bounds = t(bounds)
 ```
 
 
-```{r}
+```{r summary}
 # Number of samples per island
 summary.samples = data %>%
   group_by(RegionCode) %>%
@@ -133,12 +130,12 @@ Number of BMUS in
 ## Data extents and ranges
 
 ```{r bounds}
-kable(bounds, format = "latex", booktabs = TRUE, longtable = TRUE) %>% kable_styling(latex_options = c("striped", "hold_position", "repeat_header"))
+kable(bounds, format = "html", booktabs = TRUE, longtable = TRUE) %>% kable_styling(latex_options = c("striped", "hold_position", "repeat_header"))
 ```
 
 
 ```{r}
-kable(summary.samples, format = "latex", booktabs = TRUE, longtable = TRUE) %>% kable_styling(latex_options = c("striped", "hold_position", "repeat_header","scale_down") , font_size = 8)
+kable(summary.samples, format = "html", booktabs = TRUE, longtable = TRUE) %>% kable_styling(latex_options = c("striped", "hold_position", "repeat_header","scale_down") , font_size = 8)
 ```
 
 
@@ -172,7 +169,7 @@ plot3<-ggplot(data = data) +
 plot3
 ```
 
-```{r volumeVSmass echo=FALSE }
+```{r volumeVSmass, echo=FALSE}
 
 plot4<-ggplot(data = data) +
   geom_point(aes(x = (PostVolume-PreVolume), 
