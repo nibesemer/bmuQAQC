@@ -161,6 +161,29 @@ kable(summary.samples, format = "html", booktabs = TRUE, longtable = TRUE) %>% k
 ## QAQC Plots
 
 
+### Change in Volume vs Change in Weight
+
+Should have a linear relationship
+
+
+```{r volumeVSmass, echo=FALSE, fig.width = 6, fig.height = 4}
+
+plot1<-ggplot(data = data) +
+  geom_point(aes(x = (PostVolume-PreVolume), 
+                y = (PostWeightClean-PreWeightEpoxied)),
+             size=3, colour = "black")+
+  scale_x_continuous(name=bquote('volDifference'~(cm^3)))+
+  scale_y_continuous(name = "weightDifference (g)")
+
+plot1
+
+
+```
+
+
+
+
+
 ###  Macroboring by bmu
 
 Check for non-negatives and any extreme outliers
@@ -169,12 +192,12 @@ Check for non-negatives and any extreme outliers
 
 
 ```{r plot macroboring, echo=FALSE, fig.width = 6, fig.height = 4}
-plot1<-ggplot(data = data) +
+plot2<-ggplot(data = data) +
   geom_point(aes(x = tagNum, 
                 y = PostCTMacroboring*-1),
              size=3, colour = "red")+
   scale_y_continuous(name = bquote('PostCTMacroboring'~(cm^3)))
-plot1
+plot2
 ```
 
 
@@ -185,12 +208,12 @@ plot1
 
 
 ```{r plotgrazing, echo=FALSE, fig.width = 6, fig.height = 4}
-plot2<-ggplot(data = data) +
+plot3<-ggplot(data = data) +
   geom_point(aes(x = tagNum, 
                 y = PostCTGrazing*-1),
              size=3, colour = "blue")+
   scale_y_continuous(name = bquote('PostCTGrazing'~(cm^3)))
-plot2
+plot3
 
 
 ```
@@ -199,12 +222,12 @@ plot2
 
 ### Accretion by BMU
 ```{r accretion, echo=FALSE, fig.width = 6, fig.height = 4}
-plot3<-ggplot(data = data) +
+plot4<-ggplot(data = data) +
   geom_point(aes(x = tagNum, 
                 y = PostCTAccretion),
              size=3, colour = "darkgreen")+
   scale_y_continuous(name = bquote('PostCTAccretion'~(cm^3)))
-plot3
+plot4
 ```
 
 
@@ -219,33 +242,16 @@ plot3
 
 
 ```{r grazingVSaccretion, echo=FALSE, fig.width = 6, fig.height = 4}
-plot4<-ggplot(data = data) +
+plot5<-ggplot(data = data) +
   geom_point(aes(x = PostCTAccretion, 
                 y = (PostCTGrazing*-1)),
              size=3, colour = "black")+
   scale_x_continuous(name=bquote('PostCTAccretion'~(cm^3)))+
   scale_y_continuous(name = bquote('PostCTGrazing'~(cm^3)))
-plot4
-```
-
-### Change in Volume vs Change in Weight
-
-Should have a linear relationship
-
-
-```{r volumeVSmass, echo=FALSE, fig.width = 6, fig.height = 4}
-
-plot5<-ggplot(data = data) +
-  geom_point(aes(x = (PostVolume-PreVolume), 
-                y = (PostWeightClean-PreWeightEpoxied)),
-             size=3, colour = "black")+
-  scale_x_continuous(name=bquote('volDifference'~(cm^3)))+
-  scale_y_continuous(name = "weightDifference (g)")
-
 plot5
-
-
 ```
+
+
 
 
 ### Net Accretion vs Net Erosion
@@ -297,6 +303,51 @@ plot8
 
 
 ```
+
+
+### All BMU Accretion and Erosion
+
+```{r bardata, include=FALSE}
+library(tidyr)
+data2<-select(data, tagNum, PostCTGrazing, PostCTMacroboring, PostCTAccretion)
+data2$PostCTMacroboring<-data2$PostCTMacroboring*-1
+data2$PostCTGrazing<-data2$PostCTGrazing*-1
+head(data2)
+
+
+data3 <- gather(data2,
+                   key = "bmuAttribute",
+                   value = "carbAmount",
+                   -tagNum)
+head(data3)
+
+
+```
+
+
+```{r bar graph, echo=FALSE, fig.width = 8, fig.height = 4}
+
+
+data3$bmuAttribute <- factor(data3$bmuAttribute, levels = c("PostCTGrazing", "PostCTmacroboring", "PostCTAccretion"))
+data3$carbAmount = as.numeric(as.character(data3$carbAmount))
+
+bmubar = ggplot(data = data3, aes(x=tagNum, y=carbAmount, fill=bmuAttribute))+
+  geom_bar(stat="identity", color="black",
+           position = position_dodge())+
+  labs(y=expression("Amount change (cm3)"), x="BMU Number")+
+  scale_fill_manual(name = "bmuAttribute", labels = c("Accretion", "Grazing", "Macroboring"), values=c("#009E73", "#56B4E0","#D55E00" ))
+bmubar
+
+
+
+
+
+
+
+```
+
+
+
 
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

@@ -12,3 +12,5 @@ netAccretion vs net erosion	aes	bquote	data	geom_point	ggplot	PostCTAccretion	Po
 bioerosion rate	aes	bquote	data	element_blank	geom_boxplot	geom_point	ggplot	labs	PostCTGrazingRate	PostCTMacroboringRate	RegionCode	theme
 accretionRate	aes	bquote	data	element_blank	geom_boxplot	geom_point	ggplot	labs	PostCTAccretionRate	RegionCode	theme
 accretion	aes	bquote	data	geom_point	ggplot	PostCTAccretion	scale_y_continuous	tagNum
+bar graph	$	$<-	aes	as.character	as.numeric	bmuAttribute	c	carbAmount	expression	factor	geom_bar	ggplot	labs	position_dodge	scale_fill_manual	tagNum
+bardata	$	$<-	data	gather	head	library	PostCTAccretion	PostCTGrazing	PostCTMacroboring	select	tagNum
