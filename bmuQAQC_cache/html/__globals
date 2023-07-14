@@ -1,7 +1,7 @@
 load data	head	read_csv
-set_dates	$	$<-	mdy
+set_dates	$	$<-	as.numeric	format	mdy
 set bounds	$	$<-	as.data.frame	c	colnames<-	data	length	matrix	max	min	rownames<-	t
-summary	%>%	==	data	Duration	Fate	group_by	length	mean	RegionCode	summarize	tagNum
+summary	%>%	==	data	Duration	Fate	group_by	length	mean	recoveryYear	RegionCode	summarize	tagNum
 bounds	%>%	bounds	c	kable	kable_styling
 unnamed-chunk-1	%>%	c	kable	kable_styling	summary.samples
 plot macroboring	aes	bquote	data	geom_point	ggplot	PostCTMacroboring	scale_y_continuous	tagNum
@@ -9,8 +9,8 @@ plotgrazing	aes	bquote	data	geom_point	ggplot	PostCTGrazing	scale_y_continuous	t
 grazingVSaccretion	aes	bquote	data	geom_point	ggplot	PostCTAccretion	PostCTGrazing	scale_x_continuous	scale_y_continuous
 volumeVSmass	aes	bquote	data	geom_point	ggplot	PostVolume	PostWeightClean	PreVolume	PreWeightEpoxied	scale_x_continuous	scale_y_continuous
 netAccretion vs net erosion	aes	bquote	data	geom_point	ggplot	PostCTAccretion	PostCTGrazing	PostCTMacroboring	scale_x_continuous	scale_y_continuous
-bioerosion rate	aes	bquote	data	element_blank	geom_boxplot	geom_point	ggplot	labs	PostCTGrazingRate	PostCTMacroboringRate	RegionCode	theme
-accretionRate	aes	bquote	data	element_blank	geom_boxplot	geom_point	ggplot	labs	PostCTAccretionRate	RegionCode	theme
+bioerosion rate	aes	bquote	data	geom_boxplot	geom_point	ggplot	labs	PostCTGrazingRate	PostCTMacroboringRate	RegionCode
+accretionRate	aes	bquote	data	geom_boxplot	geom_point	ggplot	labs	PostCTAccretionRate	RegionCode
 accretion	aes	bquote	data	geom_point	ggplot	PostCTAccretion	scale_y_continuous	tagNum
-bar graph	$	$<-	aes	as.character	as.numeric	bmuAttribute	c	carbAmount	expression	factor	geom_bar	ggplot	labs	position_dodge	scale_fill_manual	tagNum
-bardata	$	$<-	data	gather	head	library	PostCTAccretion	PostCTGrazing	PostCTMacroboring	select	tagNum
+bar graph	$	$<-	aes	as.character	as.numeric	bmuAttribute	c	carbAmount	expression	factor	geom_bar	ggplot	labs	position_dodge	RegionCode	scale_fill_manual
+bardata	$	$<-	data	gather	head	library	PostCTAccretion	PostCTGrazing	PostCTMacroboring	RegionCode	select	tagNum

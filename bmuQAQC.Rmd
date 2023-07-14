@@ -45,7 +45,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE, error = FALSE, echo = FA
 ##loaddata
 
 
-data<-read_csv("~/documents/R/bmuQAQC/NCRMP_BMU_DRTO_2021.csv")
+data<-read_csv("~/Documents/GitHub/bmuQAQC/2023bmuData.csv")
 head(data)
 
 
@@ -56,6 +56,7 @@ head(data)
 
 data$Deployment = mdy(data$Deployment)
 data$Recovery = mdy(data$Recovery)
+data$recoveryYear<- as.numeric(format(data$Recovery, "%Y"))
 
 
 ```
@@ -84,7 +85,8 @@ vars =  c(
   "PostCTGrazing",
   "PostCTGrazingRate",
   "PostCTAccretion",
-  "PostCTAccretionRate"
+  "PostCTAccretionRate",
+  "recoveryYear"
 )
 
 bounds = as.data.frame(matrix(nrow = 2, ncol = length(vars)))
@@ -92,29 +94,30 @@ colnames(bounds) = vars
 rownames(bounds) = c("Min", "Max")
 
 
-bounds$Latitude = c(min(data$Latitude), max(data$Latitude))
-bounds$Longitude = c(min(data$Longitude), max(data$Longitude))
+bounds$Latitude = c(min(data$Latitude, na.rm = TRUE), max(data$Latitude, na.rm = TRUE))
+bounds$Longitude = c(min(data$Longitude, na.rm = TRUE), max(data$Longitude, na.rm = TRUE))
 
 
-bounds$PreWeightBlock = c(min(data$PreWeightBlock), max(data$PreWeightBlock))
-bounds$PreWeightEpoxied = c(min(data$PreWeightEpoxied), max(data$PreWeightEpoxied))
-bounds$PreVolume = c(min(data$PreVolume), max(data$PreVolume))
-bounds$PreRWDensity = c(min(data$PreRWDensity), max(data$PreRWDensity))
-bounds$PreCTDensity = c(min(data$PreCTDensity), max(data$PreCTDensity))
+bounds$PreWeightBlock = c(min(data$PreWeightBlock, na.rm = TRUE), max(data$PreWeightBlock, na.rm = TRUE))
+bounds$PreWeightEpoxied = c(min(data$PreWeightEpoxied, na.rm = TRUE), max(data$PreWeightEpoxied, na.rm = TRUE))
+bounds$PreVolume = c(min(data$PreVolume, na.rm = TRUE), max(data$PreVolume, na.rm = TRUE))
+bounds$PreRWDensity = c(min(data$PreRWDensity, na.rm = TRUE), max(data$PreRWDensity, na.rm = TRUE))
+bounds$PreCTDensity = c(min(data$PreCTDensity, na.rm = TRUE), max(data$PreCTDensity, na.rm = TRUE))
 
 
-bounds$PostWeightDirty = c(min(data$PostWeightDirty), max(data$PostWeightDirty))
-bounds$PostWeightClean = c(min(data$PostWeightClean), max(data$PostWeightClean))
-bounds$PostVolume = c(min(data$PostVolume), max(data$PostVolume))
-bounds$PostCTDensity = c(min(data$PostCTDensity), max(data$PostCTDensity))
+bounds$PostWeightDirty = c(min(data$PostWeightDirty, na.rm = TRUE), max(data$PostWeightDirty, na.rm = TRUE))
+bounds$PostWeightClean = c(min(data$PostWeightClean, na.rm = TRUE), max(data$PostWeightClean, na.rm = TRUE))
+bounds$PostVolume = c(min(data$PostVolume, na.rm = TRUE), max(data$PostVolume, na.rm = TRUE))
+bounds$PostCTDensity = c(min(data$PostCTDensity, na.rm = TRUE), max(data$PostCTDensity, na.rm = TRUE))
 
 
-bounds$PostCTMacroboring = c(min(data$PostCTMacroboring), max(data$PostCTMacroboring))
-bounds$PostCTMacroboringRate = c(min(data$PostCTMacroboringRate), max(data$PostCTMacroboringRate))
-bounds$PostCTGrazing = c(min(data$PostCTGrazing), max(data$PostCTGrazing))
-bounds$PostCTGrazingRate = c(min(data$PostCTGrazingRate), max(data$PostCTGrazingRate))
-bounds$PostCTAccretion = c(min(data$PostCTAccretion), max(data$PostCTAccretion))
-bounds$PostCTAccretionRate = c(min(data$PostCTAccretionRate), max(data$PostCTAccretionRate))
+bounds$PostCTMacroboring = c(min(data$PostCTMacroboring, na.rm = TRUE), max(data$PostCTMacroboring, na.rm = TRUE))
+bounds$PostCTMacroboringRate = c(min(data$PostCTMacroboringRate, na.rm = TRUE), max(data$PostCTMacroboringRate, na.rm = TRUE))
+bounds$PostCTGrazing = c(min(data$PostCTGrazing, na.rm = TRUE), max(data$PostCTGrazing, na.rm = TRUE))
+bounds$PostCTGrazingRate = c(min(data$PostCTGrazingRate, na.rm = TRUE), max(data$PostCTGrazingRate, na.rm = TRUE))
+bounds$PostCTAccretion = c(min(data$PostCTAccretion, na.rm = TRUE), max(data$PostCTAccretion, na.rm = TRUE))
+bounds$PostCTAccretionRate = c(min(data$PostCTAccretionRate, na.rm = TRUE), max(data$PostCTAccretionRate, na.rm = TRUE))
+bounds$recoveryYear = c(min(data$recoveryYear, na.rm = TRUE), max(data$recoveryYear, na.rm = TRUE))
 
 bounds = t(bounds)
 
@@ -124,10 +127,10 @@ bounds = t(bounds)
 ```{r summary}
 # Number of samples per island
 summary.samples = data %>%
-  group_by(RegionCode) %>%
+  group_by(RegionCode, recoveryYear) %>%
   summarize(
     totalSamples = length(tagNum),
-    deplomentDuration = mean(Duration),
+    deplomentDuration = mean(Duration, na.rm = TRUE),
     numberRecovered = length(Fate == 'SUCCESSFULY RECOVERED'))
 ```
 
@@ -145,7 +148,7 @@ Number of samples in data file: `r nrow(data)`
 Macroboring, macroboring rate, grazing and grazing rate represent negative values
 
 ```{r bounds}
-kable(bounds, format = "html", booktabs = TRUE, longtable = TRUE) %>% kable_styling(latex_options = c("striped", "hold_position", "repeat_header"), full_width = FALSE)
+kable(bounds, format = "html", booktabs = TRUE, longtable = TRUE, omit.na = TRUE) %>% kable_styling(latex_options = c("striped", "hold_position", "repeat_header"), full_width = FALSE)
 ```
 
 
@@ -204,14 +207,14 @@ plot2
 
 ### Grazing by BMU
 
-
+There should be no positive values
 
 
 ```{r plotgrazing, echo=FALSE, fig.width = 6, fig.height = 4}
 plot3<-ggplot(data = data) +
   geom_point(aes(x = tagNum, 
                 y = PostCTGrazing*-1),
-             size=3, colour = "blue")+
+             size=3, colour = 'red')+
   scale_y_continuous(name = bquote('PostCTGrazing'~(cm^3)))
 plot3
 
@@ -275,15 +278,14 @@ plot6
 
 ### Bioerosion Rate
 
-combination of macroboring and grazing
+combination of macroboring and grazing (lack of pre scan information for STT and STJ means we cannot calculate the erosion rate for these locations)
 
 
 ```{r bioerosion rate, echo=FALSE, fig.width = 5, fig.height = 5}
 
 plot7<- ggplot(data=data) + 
   geom_boxplot(aes(x=RegionCode, y=((PostCTGrazingRate+PostCTMacroboringRate)*-1)))+
-  labs(x="Dry Tortugas", y = bquote('Erosion Rate'~(cm^3/year)))+ geom_point(aes(x=RegionCode, y=((PostCTGrazingRate+PostCTMacroboringRate)*-1)), shape=16, size=3)+
-  theme(axis.text.x = element_blank())
+  labs(y = bquote('Erosion Rate'~(cm^3/year)))+ geom_point(aes(x=RegionCode, y=((PostCTGrazingRate+PostCTMacroboringRate)*-1)), shape=16, size=3)
 
 plot7
 
@@ -291,13 +293,14 @@ plot7
 
 ### Accretion Rate
 
+Florida keys samples have a noticeably higher accretion rate. There is a higher sample size and some were left out significantly longer than others. Should like into how deployment time affects accretion rates. 
+
 
 ```{r accretionRate, echo=FALSE, , fig.width = 5, fig.height = 5}
 
 plot8<- ggplot(data=data) + 
   geom_boxplot(aes(x=RegionCode, y=(PostCTAccretionRate)))+
-  labs(x="Dry Tortugas", y = bquote('Accretion Rate'~(cm^3/year)))+ geom_point(aes(x=RegionCode, y=(PostCTAccretionRate)), shape=16, size=3)+
-  theme(axis.text.x = element_blank())
+  labs(x="Region", y = bquote('Accretion Rate'~(cm^3/year)))+ geom_point(aes(x=RegionCode, y=(PostCTAccretionRate)), shape=16, size=3)
 
 plot8
 
@@ -309,7 +312,7 @@ plot8
 
 ```{r bardata, include=FALSE}
 library(tidyr)
-data2<-select(data, tagNum, PostCTGrazing, PostCTMacroboring, PostCTAccretion)
+data2<-select(data,RegionCode, tagNum, PostCTGrazing, PostCTMacroboring, PostCTAccretion)
 data2$PostCTMacroboring<-data2$PostCTMacroboring*-1
 data2$PostCTGrazing<-data2$PostCTGrazing*-1
 head(data2)
@@ -318,7 +321,7 @@ head(data2)
 data3 <- gather(data2,
                    key = "bmuAttribute",
                    value = "carbAmount",
-                   -tagNum)
+                   -tagNum, -RegionCode)
 head(data3)
 
 
@@ -331,11 +334,11 @@ head(data3)
 data3$bmuAttribute <- factor(data3$bmuAttribute, levels = c("PostCTGrazing", "PostCTmacroboring", "PostCTAccretion"))
 data3$carbAmount = as.numeric(as.character(data3$carbAmount))
 
-bmubar = ggplot(data = data3, aes(x=tagNum, y=carbAmount, fill=bmuAttribute))+
+bmubar = ggplot(data = data3, aes(x=RegionCode, y=carbAmount, fill=bmuAttribute))+
   geom_bar(stat="identity", color="black",
            position = position_dodge())+
   labs(y=expression("Amount change (cm3)"), x="BMU Number")+
-  scale_fill_manual(name = "bmuAttribute", labels = c("Accretion", "Grazing", "Macroboring"), values=c("#009E73", "#56B4E0","#D55E00" ))
+  scale_fill_manual(name = "bmuAttribute", labels = c("Grazing", "Accretion", "Macroboring"), values=c("#009E73", "#56B4E0","#D55E00" ))
 bmubar
 
 
