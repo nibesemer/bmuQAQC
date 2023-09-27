@@ -1,0 +1,11 @@
+knitr
+lubridate
+dplyr
+scales
+ggplot2
+kableExtra
+ggpubr
+webshot
+readr
+timechange
+tidyr
