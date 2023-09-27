@@ -35,6 +35,7 @@ library(kableExtra)
 library(ggpubr)
 library(webshot)
 library(readr)
+library(timechange)
 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE, error = FALSE, echo = FALSE, cache = TRUE, autodep = TRUE, cache.comments = FALSE, tidy.opts=list(width.cutoff=60),tidy=TRUE, cache.lazy = FALSE, results = "asis")
 ```
@@ -42,10 +43,9 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE, error = FALSE, echo = FA
 
 
 ```{r load data, echo=FALSE, include=FALSE}
-##loaddata
 
 
-data<-read_csv("~/Documents/GitHub/bmuQAQC/2023bmuData.csv")
+data<-read_csv("~/Documents/R/bmuQAQC/NCRMP_BMU_Atlantic2022.csv")
 head(data)
 
 
@@ -337,7 +337,7 @@ data3$carbAmount = as.numeric(as.character(data3$carbAmount))
 bmubar = ggplot(data = data3, aes(x=RegionCode, y=carbAmount, fill=bmuAttribute))+
   geom_bar(stat="identity", color="black",
            position = position_dodge())+
-  labs(y=expression("Amount change (cm3)"), x="BMU Number")+
+  labs(y=expression("Amount change (cm3)"), x="BMU Region")+
   scale_fill_manual(name = "bmuAttribute", labels = c("Grazing", "Accretion", "Macroboring"), values=c("#009E73", "#56B4E0","#D55E00" ))
 bmubar
 
@@ -351,6 +351,5 @@ bmubar
 
 
 
-test test test
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
