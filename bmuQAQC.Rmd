@@ -94,6 +94,7 @@ colnames(bounds) = vars
 rownames(bounds) = c("Min", "Max")
 
 
+
 bounds$Latitude = c(min(data$Latitude, na.rm = TRUE), max(data$Latitude, na.rm = TRUE))
 bounds$Longitude = c(min(data$Longitude, na.rm = TRUE), max(data$Longitude, na.rm = TRUE))
 
@@ -118,6 +119,10 @@ bounds$PostCTGrazingRate = c(min(data$PostCTGrazingRate, na.rm = TRUE), max(data
 bounds$PostCTAccretion = c(min(data$PostCTAccretion, na.rm = TRUE), max(data$PostCTAccretion, na.rm = TRUE))
 bounds$PostCTAccretionRate = c(min(data$PostCTAccretionRate, na.rm = TRUE), max(data$PostCTAccretionRate, na.rm = TRUE))
 bounds$recoveryYear = c(min(data$recoveryYear, na.rm = TRUE), max(data$recoveryYear, na.rm = TRUE))
+
+bounds<-round(bounds, digits=3)
+bounds$recoveryYear<-as.integer(bounds$recoveryYear)
+
 
 bounds = t(bounds)
 
